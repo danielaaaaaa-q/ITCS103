@@ -186,4 +186,6 @@ tree.grid(row=8, column=0, columnspan=4)
 
 tree.bind("<<TreeviewSelect>>", select_record)
 
+display()
+
 window.mainloop()

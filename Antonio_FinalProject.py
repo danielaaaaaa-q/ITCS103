@@ -4,7 +4,7 @@ import openpyxl as op
 
 def input_validation():
     name = cname_entry.get()
-    product = product_entry.get()
+    product = item_prod.get()
     qty = qty_entry.get()
     price = price_entry.get()
 
@@ -19,7 +19,7 @@ def input_validation():
     return True
 
 def display_order():
-    wbk = op.load_workbook("ordersDB.xlsx")
+    wbk = op.load_workbook("Antonio_Database.xlsx")
     sheet = wbk.active
 
     for item in table.get_children():
@@ -33,12 +33,12 @@ def append_excel():
         return
     
     name = cname_entry.get()
-    product = product_entry.get()
+    product = item_prod.get()
     qty = int(qty_entry.get())
     price = int(price_entry.get())
     total_amount = qty * price
     
-    wbk = op.load_workbook("ordersDB.xlsx")
+    wbk = op.load_workbook("Antonio_Database.xlsx")
     sheet = wbk.active
 
     new_order_id = sheet.max_row
@@ -47,7 +47,7 @@ def append_excel():
 
     messagebox.showinfo("Success", "Order added successfully!")
 
-    wbk.save("ordersDB.xlsx")
+    wbk.save("Antonio_Database.xlsx")
     display_order()
 
 def auto_populate(event):
@@ -56,12 +56,12 @@ def auto_populate(event):
 
     if values:
         cname_entry.delete(0, tk.END)
-        product_entry.delete(0, tk.END)
+        item_prod.delete(0, tk.END)
         qty_entry.delete(0, tk.END)
         price_entry.delete(0, tk.END)
 
         cname_entry.insert(0, values[1])
-        product_entry.insert(0, values[2])
+        item_prod.insert(0, values[2])
         qty_entry.insert(0, values[3])
         price_entry.insert(0, values[4])
 
@@ -79,30 +79,95 @@ def update():
     values = table.item(selected, "values")
     record_order_id = values[0]
 
-    wbk = op.load_workbook("ordersDB.xlsx")
+    wbk = op.load_workbook("Antonio_Database.xlsx")
     sheet = wbk.active
 
     if values:
     
         for row in sheet.iter_rows(min_row=2):
-            if row[0].value == record_order_id:
-                row[1].value = cname_entry.get()
-                row[2].value = product_entry.get()
-                row[3].value = int(qty_entry.get())
-                row[4].value = eval(price_entry.get())
-                row[5].value = int(qty_entry.get()) * eval(price_entry.get())
 
-        wbk.save("ordersDB.xlsx")
+            if str(row[0].value) == str(record_order_id):
+                row[1].value = cname_entry.get()
+                row[2].value = item_prod.get()
+                row[3].value = int(qty_entry.get())
+                row[4].value = int(price_entry.get())
+                row[5].value = int(qty_entry.get()) * int(price_entry.get())
+
+        wbk.save("Antonio_Database.xlsx")
+
         display_order()
 
     messagebox.showinfo("Success", "Order updated successfully!")
 
+def delete():
+    selected = table.focus()
+
+    if not selected:
+        messagebox.showerror("Error", "Please select a record first.")
+        return
+    
+    values = table.item(selected, "values")
+    record_id = values[0]
+
+    confirm = messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this record?")
+    if not confirm:
+        return
+
+    wbk = op.load_workbook("Antonio_Database.xlsx")
+    sheet = wbk.active
+
+    for i, row in enumerate(sheet.iter_rows(min_row=2), start=2):
+        if str(row[0].value) == str(record_id):
+            sheet.delete_rows(i)
+            break
+            
+    wbk.save("Antonio_Database.xlsx")
+
+    messagebox.showinfo("Success", "Record deleted successfully!")
+    display_order()
+
+def auto_price(event):
+    if item_prod.get() == "Spanish Latte":
+        price_entry.delete(0, tk.END)
+        price_entry.insert(0, "120")
+    elif item_prod.get() == "Matcha Latte":
+        price_entry.delete(0, tk.END)
+        price_entry.insert(0, "145")
+    elif item_prod.get() == "Carbonara":
+        price_entry.delete(0, tk.END)
+        price_entry.insert(0, "180")
+    elif item_prod.get() == "French Toast":
+        price_entry.delete(0, tk.END)
+        price_entry.insert(0, "130")
+    elif item_prod.get() == "Caramel Macchiato":
+        price_entry.delete(0, tk.END)
+        price_entry.insert(0, "135")
+    elif item_prod.get() == "Tiramisu":
+        price_entry.delete(0, tk.END)
+        price_entry.insert(0, "180")
+    elif item_prod.get() == "Strawberry Cheesecake":
+        price_entry.delete(0, tk.END)
+        price_entry.insert(0, "200")
+    elif item_prod.get() == "Blueberry Cheesecake":
+        price_entry.delete(0, tk.END)
+        price_entry.insert(0, "200")
+    elif item_prod.get() == "Caesar Salad":
+        price_entry.delete(0, tk.END)
+        price_entry.insert(0, "250")
+    elif item_prod.get() == "Fries":
+        price_entry.delete(0, tk.END)
+        price_entry.insert(0, "100")
+    
+    return
+
+
 window = tk.Tk()
-window.title("Simple Ordering System")
-window.configure(bg="lightblue")
+window.title("Cafe Ordering System")
+window.geometry("1225x500")
+window.configure(bg="pink")
 
 # Form Title
-title = tk.Label(window, text="Simple Ordering System", font=("Times New Roman", 14, "bold"), bg="lightblue")
+title = tk.Label(window, text="Velvet Beans Cafe", font=("Times New Roman", 20, "bold"), bg="pink")
 title.grid(row=0, column=0, columnspan=6)
 
 # Frame
@@ -116,12 +181,26 @@ cname_entry.grid(row=2, column=1, columnspan=2, padx=10, pady=(10, 0))
 cname_label = tk.Label(genframe, text="Customer Name", font=("Poppins", 10, "italic"), bg="lightblue")
 cname_label.grid(row=3, column=1, columnspan=2)
 
-# Product Entry
-product_entry = tk.Entry(genframe, font=("Poppins", 12))
-product_entry.grid(row=2, column=3, columnspan=2, padx=10, pady=(10, 0))
-
 product_label = tk.Label(genframe, text="Product", font=("Poppins", 10, "italic"), bg="lightblue")
+
 product_label.grid(row=3, column=3, columnspan=2)
+#product combobox
+item_prod = ttk.Combobox(genframe, font=("Poppins", 12))
+
+item_prod['values'] = (
+                        "Spanish Latte", 
+                       "Matcha Latte", 
+                       "Carbonara", 
+                       "French Toast", 
+                       "Caramel Macchiato", 
+                       "Tiramisu", 
+                       "Strawberry Cheesecake", 
+                       "Blueberry Cheesecake", 
+                       "Caesar Salad",
+                       "Fries"
+                       )
+
+item_prod.grid(row=2, column=3, columnspan=2, padx=10, pady=(10, 0))
 
 # Quantity Entry
 qty_entry = tk.Entry(genframe, font=("Poppins", 12))
@@ -138,14 +217,14 @@ price_label = tk.Label(genframe, text="Price", font=("Poppins", 10, "italic"), b
 price_label.grid(row=5, column=3, columnspan=2)
 
 # Buttons
-submit_btn = tk.Button(window, text="Submit", font=("Poppins", 12, "bold"), bg="lightpink", command=append_excel)
-submit_btn.grid(row=6, column=1, pady=(10, 20))
+submit_btn = tk.Button(window, text="Submit", font=("Poppins", 12, "bold"), bg="yellow", command=append_excel)
+submit_btn.grid(row=6, column=1, padx=(90, 0), pady=(10, 20))
 
 update_btn = tk.Button(window, text="Update",font=("Poppins", 12, "bold"), bg="lightgreen", command=update)
-update_btn.grid(row=6, column=2)
+update_btn.grid(row=6, column=2, padx=(140, 0), pady=(10, 20))
 
-delete_btn = tk.Button(window, text="Delete", bg="red", fg="white",font=("Poppins", 12, "bold"))
-delete_btn.grid(row=6, column=3)
+delete_btn = tk.Button(window, text="Delete", bg="red", fg="white",font=("Poppins", 12, "bold"), command=delete)
+delete_btn.grid(row=6, column=3, padx=(140, 0), pady=(10, 20))
 
 # Table
 table = ttk.Treeview(
@@ -160,6 +239,8 @@ for headings in ("Order ID", "Customer Name", "Product", "Quantity", "Price", "T
 table.grid(row=7, column=0, columnspan=6, padx=10, pady=10)
 
 table.bind("<<TreeviewSelect>>", auto_populate)
+
+item_prod.bind("<<ComboboxSelected>>", auto_price)
 
 display_order()
 
